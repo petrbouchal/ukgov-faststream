@@ -8,10 +8,13 @@ str(fs)
 
 years  <- unique(fs$Year)
 
-fs$TotalApps <- fs$Total.Applicants
-fs$TotalOffers <- fs$Total.Successful
+fs <- rename(fs,c("Total.Applicants" = "Apps", "Total.Successful" = "Offers",
+                  "Degree.Type" = "Degree","Overall.Success.Rate"="SuccessRate"))
+
+fs$Apps <- fs$Total.Applicants
+fs$Offers <- fs$Total.Successful
 fs$Degree <- fs$Degree.Type
-fs$SuccessRate <- fs$OverallSuccessRate
+fs$SuccessRate <- fs$Overall.Success.Rate
 
 fs$Degree.Type <- NULL
 fs$Total.Applicants <- NULL
@@ -19,21 +22,21 @@ fs$Total.Successful <- NULL
 fs$Overall.Success.Rate <- NULL
 
 for (i in years) {
-  fs$GrandTotalApps <- fs$TotalApps[fs$Degree=="Overall" & fs$Year==i]
-  fs$GrandTotalOffers[fs$Year==i] <- fs$TotalOffers[fs$Degree=="Overall" &
+  fs$GrandApps <- fs$Apps[fs$Degree=="Overall" & fs$Year==i]
+  fs$GrandOffers[fs$Year==i] <- fs$Offers[fs$Degree=="Overall" &
                                                       fs$Year==i]
 }
 
 fs <- fs[fs$Degree !="Overall", ]
 
-fs$SuccessRate <- fs$TotalOffers/fs$TotalApps
+fs$SuccessRate <- fs$Offers/fs$Apps
 
-fs$OverallSuccessRate <- fs$GrandTotalOffers/fs$GrandTotalApps
+fs$OverallSuccessRate <- fs$GrandOffers/fs$GrandApps
 
 fs$RelativeSuccessRate <- fs$SuccessRate/fs$OverallSuccessRate-1
 
-fs$ShareofApps  <- fs$TotalApps/fs$GrandTotalApps 
-fs$ShareofOffers  <- fs$TotalOffers/fs$GrandTotalOffers
+fs$ShareofApps  <- fs$Apps/fs$GrandApps 
+fs$ShareofOffers  <- fs$Offers/fs$GrandOffers
 
 fs$Area[fs$Degree=="Mathematics"] <- "STEM" 
 fs$Area[fs$Degree=="Sciences (Physical & Biology)"] <- "STEM" 
@@ -52,14 +55,14 @@ fs$Area <- as.factor(fs$Area)
 fs <- droplevels.data.frame(fs)
 
 fsplot <- ggplot(fs, aes(ShareofApps, ShareofOffers)) +
-  geom_point(aes(size=log(fs$TotalOffers), colour=fs$Area)) +
+  geom_point(aes(size=log(fs$Offers), colour=fs$Area)) +
   geom_point() +
   geom_text(aes(label=fs$Degree))+
   facet_wrap(~Year)
 fsplot
 
 fsbar <- ggplot(fs, aes(Degree,RelativeSuccessRate)) +
-  geom_bar(aes(fill=fs$TotalOffers),stat="identity",position="dodge")+
+  geom_bar(aes(fill=fs$Offers),stat="identity",position="dodge")+
   facet_wrap(~Year)+
   coord_flip()+
   theme_minimal(base_size=14)+
