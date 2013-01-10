@@ -74,4 +74,7 @@ fsbar
 ggsave(plot=fsbar, file="./fsbar.png",scale=1.5)
 ggsave(plot=fsbar, file="./fsbar.pdf",scale=1.1)
 
+ggsave(plot=fsplot, file="./fsplot.png",scale=1.1)
+
+
 write.csv(fs,file="./fsdata_processed.csv")
