@@ -9,7 +9,7 @@ str(fs)
 years  <- unique(fs$Year)
 
 fs$TotalApps <- fs$Total.Applicants
-fs$TotalHires <- fs$Total.Successful
+fs$TotalOffers <- fs$Total.Successful
 fs$Degree <- fs$Degree.Type
 fs$SuccessRate <- fs$OverallSuccessRate
 
@@ -20,19 +20,20 @@ fs$Overall.Success.Rate <- NULL
 
 for (i in years) {
   fs$GrandTotalApps <- fs$TotalApps[fs$Degree=="Overall" & fs$Year==i]
-  fs$GrandTotalHires[fs$Year==i] <- fs$TotalHires[fs$Degree=="Overall" & fs$Year==i]
+  fs$GrandTotalOffers[fs$Year==i] <- fs$TotalOffers[fs$Degree=="Overall" &
+                                                      fs$Year==i]
 }
 
 fs <- fs[fs$Degree !="Overall", ]
 
-fs$SuccessRate <- fs$TotalHires/fs$TotalApps
+fs$SuccessRate <- fs$TotalOffers/fs$TotalApps
 
-fs$OverallSuccessRate <- fs$GrandTotalHires/fs$GrandTotalApps
+fs$OverallSuccessRate <- fs$GrandTotalOffers/fs$GrandTotalApps
 
 fs$RelativeSuccessRate <- fs$SuccessRate/fs$OverallSuccessRate-1
 
 fs$ShareofApps  <- fs$TotalApps/fs$GrandTotalApps 
-fs$ShareofHires  <- fs$TotalHires/fs$GrandTotalHires
+fs$ShareofOffers  <- fs$TotalOffers/fs$GrandTotalOffers
 
 fs$Area[fs$Degree=="Mathematics"] <- "STEM" 
 fs$Area[fs$Degree=="Sciences (Physical & Biology)"] <- "STEM" 
@@ -50,15 +51,15 @@ fs$Area[fs$Degree=="Humanities"] <- "SocSci & Humanities"
 fs$Area <- as.factor(fs$Area)
 fs <- droplevels.data.frame(fs)
 
-fsplot <- ggplot(fs, aes(ShareofApps, ShareofHires)) +
-  geom_point(aes(size=log(fs$TotalHires), colour=fs$Area)) +
+fsplot <- ggplot(fs, aes(ShareofApps, ShareofOffers)) +
+  geom_point(aes(size=log(fs$TotalOffers), colour=fs$Area)) +
   geom_point() +
   geom_text(aes(label=fs$Degree))+
   facet_wrap(~Year)
 fsplot
 
 fsbar <- ggplot(fs, aes(Degree,RelativeSuccessRate)) +
-  geom_bar(aes(fill=fs$TotalHires),stat="identity",position="dodge")+
+  geom_bar(aes(fill=fs$TotalOffers),stat="identity",position="dodge")+
   facet_wrap(~Year)+
   coord_flip()+
   theme_minimal(base_size=14)+
