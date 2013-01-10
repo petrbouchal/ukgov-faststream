@@ -8,16 +8,22 @@ str(fs)
 
 years  <- unique(fs$Year)
 
-for (i in years) {
-  fs$GrandTotalApps <- fs$Total.Applicants[fs$Degree.Type=="Overall" & fs$Year==i]
-  fs$GrandTotalHires[fs$Year==i] <- fs$Total.Successful[fs$Degree.Type=="Overall" & fs$Year==i]
-}
-
-fs <- fs[fs$Degree.Type !="Overall", ]
-
 fs$TotalApps <- fs$Total.Applicants
 fs$TotalHires <- fs$Total.Successful
 fs$Degree <- fs$Degree.Type
+fs$SuccessRate <- fs$OverallSuccessRate
+
+fs$Degree.Type <- NULL
+fs$Total.Applicants <- NULL
+fs$Total.Successful <- NULL
+fs$Overall.Success.Rate <- NULL
+
+for (i in years) {
+  fs$GrandTotalApps <- fs$TotalApps[fs$Degree=="Overall" & fs$Year==i]
+  fs$GrandTotalHires[fs$Year==i] <- fs$TotalHires[fs$Degree=="Overall" & fs$Year==i]
+}
+
+fs <- fs[fs$Degree !="Overall", ]
 
 fs$SuccessRate <- fs$TotalHires/fs$TotalApps
 
@@ -25,29 +31,24 @@ fs$OverallSuccessRate <- fs$GrandTotalHires/fs$GrandTotalApps
 
 fs$RelativeSuccessRate <- fs$SuccessRate/fs$OverallSuccessRate-1
 
-fs$ShareofApps  <- fs$Total.Applicants/fs$GrandTotalApps 
-fs$ShareofHires  <- fs$Total.Successful/fs$GrandTotalHires
-fs$Overrepr <- fs$ShareofHires/fs$ShareofApps-1
+fs$ShareofApps  <- fs$TotalApps/fs$GrandTotalApps 
+fs$ShareofHires  <- fs$TotalHires/fs$GrandTotalHires
 
-#qplot(x=RelativeSuccessRate, y=Overrepr, data=fs)
-
-fs$Area[fs$Degree.Type=="Mathematics"] <- "STEM" 
-fs$Area[fs$Degree.Type=="Sciences (Physical & Biology)"] <- "STEM" 
-fs$Area[fs$Degree.Type=="Engineering"] <- "STEM" 
-fs$Area[fs$Degree.Type=="Technology"] <- "STEM" 
-fs$Area[fs$Degree.Type=="Medicine"] <- "Medicine" 
-fs$Area[fs$Degree.Type=="Business"] <- "Business" 
-fs$Area[fs$Degree.Type=="Other"] <- "Other" 
-fs$Area[fs$Degree.Type=="Multi Discipline"] <- "Multi" 
-fs$Area[fs$Degree.Type=="Economics"] <- "SocSci & Humanities" 
-fs$Area[fs$Degree.Type=="Languages"] <- "SocSci & Humanities" 
-fs$Area[fs$Degree.Type=="Social Sciences"] <- "SocSci & Humanities" 
-fs$Area[fs$Degree.Type=="Humanities"] <- "SocSci & Humanities"
+fs$Area[fs$Degree=="Mathematics"] <- "STEM" 
+fs$Area[fs$Degree=="Sciences (Physical & Biology)"] <- "STEM" 
+fs$Area[fs$Degree=="Engineering"] <- "STEM" 
+fs$Area[fs$Degree=="Technology"] <- "STEM" 
+fs$Area[fs$Degree=="Medicine"] <- "Medicine" 
+fs$Area[fs$Degree=="Business"] <- "Business" 
+fs$Area[fs$Degree=="Other"] <- "Other" 
+fs$Area[fs$Degree=="Multi Discipline"] <- "Multi" 
+fs$Area[fs$Degree=="Economics"] <- "SocSci & Humanities" 
+fs$Area[fs$Degree=="Languages"] <- "SocSci & Humanities" 
+fs$Area[fs$Degree=="Social Sciences"] <- "SocSci & Humanities" 
+fs$Area[fs$Degree=="Humanities"] <- "SocSci & Humanities"
 
 fs$Area <- as.factor(fs$Area)
 fs <- droplevels.data.frame(fs)
-
-fs$Year <- as.factor(fs$Year)
 
 fsplot <- ggplot(fs, aes(ShareofApps, ShareofHires)) +
   geom_point(aes(size=log(fs$TotalHires), colour=fs$Area)) +
@@ -75,6 +76,5 @@ ggsave(plot=fsbar, file="./fsbar.png",scale=1.5)
 ggsave(plot=fsbar, file="./fsbar.pdf",scale=1.1)
 
 ggsave(plot=fsplot, file="./fsplot.png",scale=1.1)
-
 
 write.csv(fs,file="./fsdata_processed.csv")
